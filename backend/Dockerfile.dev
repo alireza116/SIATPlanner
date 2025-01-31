@@ -1,0 +1,21 @@
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies
+RUN npm install
+
+# Copy the rest of the code
+COPY . .
+
+# Add nodemon configuration
+COPY nodemon.json .
+
+# Expose port
+EXPOSE 8080
+
+# Use npx to ensure we're using the local nodemon
+CMD ["npx", "nodemon", "index.js"] 
