@@ -14,7 +14,6 @@ import AddIcon from '@mui/icons-material/Add';
 import SwotCard from './SwotCard';
 import { getSwotColor } from '@/theme/swotTheme';
 import { useTheme } from '@mui/material/styles';
-import { alpha } from '@mui/material/styles';
 import MessageModal from '@/components/Common/MessageModal';
 
 
@@ -23,8 +22,6 @@ interface SwotEntry {
   type: 'Strength' | 'Weakness' | 'Opportunity' | 'Threat';
   description: string;
   createdBy: string;
-  createdAt: string;
-  updatedAt: string;
 }
 
 interface SwotListProps {
@@ -103,7 +100,8 @@ const SwotList = observer(({
       height: { xs: 'auto', md: '100%' }, 
       display: 'flex', 
       flexDirection: 'column',
-      mb: { xs: 2, md: 0 }
+      mb: { xs: 2, md: 2 },
+      flexGrow: 1
     }}>
       <Box
         sx={{
@@ -179,7 +177,7 @@ const SwotList = observer(({
               isHighlighted={uiStore.isSwotEntryHighlighted(entry._id)}
               onEditStart={setEditingEntry}
               onEditCancel={() => setEditingEntry(null)}
-              onEditSave={handleEdit}
+              onEditSave={() => handleEdit(editingEntry?.id!)}
               onDelete={handleDeleteClick}
               onEditChange={(description) => setEditingEntry({ 
                 ...editingEntry!, 

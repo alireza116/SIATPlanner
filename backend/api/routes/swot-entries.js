@@ -48,13 +48,30 @@ router.post("/", async (req, res) => {
 // Update SWOT entry
 router.put("/:id", async (req, res) => {
   try {
-    const entry = await SwotEntry.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
+    console.log("Update request:", {
+      params: req.params,
+      body: req.body,
     });
-    if (!entry)
+
+    const { description } = req.body;
+    if (!description) {
+      return res.status(400).json({ message: "Description is required" });
+    }
+
+    const entry = await SwotEntry.findById(req.params.id);
+
+    if (!entry) {
       return res.status(404).json({ message: "SWOT entry not found" });
+    }
+
+    // Only update description
+    entry.description = description;
+    await entry.save();
+
+    console.log("Updated entry:", entry);
     res.json(entry);
   } catch (error) {
+    console.error("Update error:", error);
     res.status(400).json({ message: error.message });
   }
 });

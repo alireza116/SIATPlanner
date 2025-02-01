@@ -1,8 +1,6 @@
 import { DragEvent, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import {
-  Card,
-  CardContent,
   Typography,
   IconButton,
   TextField,
@@ -19,6 +17,7 @@ import SwotChip from './SwotChip';
 import { useStore } from '@/stores/StoreProvider';
 import { useTheme } from '@mui/material/styles';
 import { getSwotColor, SwotTheme } from '@/theme/swotTheme';
+import BaseCard from '../Common/BaseCard';
 
 interface ActionCardProps {
   action: Action;
@@ -33,33 +32,14 @@ interface ActionCardProps {
   onDragOver: (e: DragEvent<HTMLDivElement>) => void;
   onDragLeave: (e: DragEvent<HTMLDivElement>) => void;
   onDrop: (e: DragEvent<HTMLDivElement>) => void;
+  onMouseEnter?: () => void;
+  onMouseLeave?: (e: React.MouseEvent<HTMLDivElement>) => void;
+  isHighlighted?: boolean;
 }
 
 const SWOT_TYPE_ORDER = ['Strength', 'Weakness', 'Opportunity', 'Threat'] as const;
 
-const groupSwotEntriesByType = (entries: SwotEntry[]) => {
-  return entries.reduce((acc, entry) => {
-    if (!acc[entry.type]) {
-      acc[entry.type] = [];
-    }
-    acc[entry.type].push(entry);
-    return acc;
-  }, {} as Record<string, SwotEntry[]>);
-};
 
-const getSortedGroupedEntries = (entries: SwotEntry[]): [string, SwotEntry[]][] => {
-  const grouped = entries.reduce((acc, entry) => {
-    if (!acc[entry.type]) {
-      acc[entry.type] = [];
-    }
-    acc[entry.type].push(entry);
-    return acc;
-  }, {} as Record<string, SwotEntry[]>);
-
-  return SWOT_TYPE_ORDER
-    .filter(type => grouped[type]?.length > 0)
-    .map(type => [type, grouped[type]]);
-};
 
 const getTypeDescription = (type: string) => {
   switch (type) {
@@ -76,14 +56,33 @@ const getTypeDescription = (type: string) => {
   }
 };
 
+const getTypePlural = (type: string) => {
+  switch (type) {
+    case 'Opportunity':
+      return 'opportunities';
+    case 'Threat':
+      return 'threats';
+    case 'Weakness':
+      return 'weaknesses';
+    case 'Strength':
+      return 'strengths';
+    default:
+      return `${type.toLowerCase()}s`;
+
+
+  }
+};
+
 const CompactSwotChip = observer(({ 
   type, 
   count, 
-  onMouseEnter, 
+  entries,
+  onMouseEnter,
   onMouseLeave 
 }: { 
   type: string; 
-  count: number; 
+  count: number;
+  entries: SwotEntry[];
   onMouseEnter: () => void;
   onMouseLeave: (e: React.MouseEvent<HTMLDivElement>) => void;
 }) => {
@@ -117,9 +116,11 @@ const ActionCard = observer(({
   onDragOver,
   onDragLeave,
   onDrop,
+  isHighlighted
 }: ActionCardProps) => {
+  const theme = useTheme();
   const { uiStore } = useStore();
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
 
   const handleActionMouseEnter = () => {
     uiStore.setHoveredActionId(
@@ -129,10 +130,10 @@ const ActionCard = observer(({
   };
 
   const handleActionMouseLeave = (e: React.MouseEvent<HTMLDivElement>) => {
-    const relatedTarget = e.relatedTarget as HTMLElement;
+    const relatedTarget = e.relatedTarget as HTMLElement | null;
     const currentTarget = e.currentTarget as HTMLElement;
     
-    if (currentTarget.contains(relatedTarget)) {
+    if (relatedTarget && currentTarget.contains(relatedTarget)) {
       return;
     }
     
@@ -147,165 +148,210 @@ const ActionCard = observer(({
     handleActionMouseEnter();
   };
 
-  const handleCompactChipMouseEnter = (entries: SwotEntry[]) => {
-    entries.forEach(entry => {
-      uiStore.setHoveredSwotEntryId(entry._id);
-    });
+
+  const renderSwotChips = () => {
+    if (!action.swotEntries?.length) return null;
+
+    const groupedEntries = action.swotEntries.reduce((acc, entry) => {
+      if (!acc[entry.type]) {
+        acc[entry.type] = [];
+      }
+      acc[entry.type].push(entry);
+      return acc;
+    }, {} as Record<string, SwotEntry[]>);
+
+    return (
+      <Box sx={{ mt: 2 }}>
+        {SWOT_TYPE_ORDER.map(type => {
+          const entries = groupedEntries[type];
+          if (!entries?.length) return null;
+
+          const description = getTypeDescription(type);
+
+          return (
+            <Box key={type} sx={{ mb: 2 }}>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                {description} {entries.length === 1 ? 'this' : 'these'} {entries.length > 1 ? getTypePlural(type) : type.toLowerCase()}:
+              </Typography>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                {entries.map((entry) => (
+                  <SwotChip
+                    key={entry._id}
+                    entry={entry}
+                    actionId={action._id}
+                    onDelete={onRemoveSwotEntry}
+                    onMouseEnter={handleChipMouseEnter}
+                    onMouseLeave={handleChipMouseLeave}
+                  />
+                ))}
+              </Box>
+            </Box>
+          );
+        })}
+      </Box>
+    );
   };
 
-  const groupedEntries = groupSwotEntriesByType(action.swotEntries || []);
-  const sortedGroupedEntries = getSortedGroupedEntries(action.swotEntries || []);
+  const renderCompactChips = () => {
+    if (!action.swotEntries?.length) return null;
+
+    const groupedEntries = action.swotEntries.reduce((acc, entry) => {
+      if (!acc[entry.type]) {
+        acc[entry.type] = [];
+      }
+      acc[entry.type].push(entry);
+      return acc;
+    }, {} as Record<string, SwotEntry[]>);
+
+    return (
+      <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
+        {SWOT_TYPE_ORDER.map(type => {
+          const entries = groupedEntries[type];
+          if (!entries?.length) return null;
+          
+          return (
+            <CompactSwotChip
+              key={type}
+              type={type}
+              count={entries.length}
+              entries={entries}
+              onMouseEnter={() => {
+                entries.forEach(entry => {
+                  uiStore.setHoveredSwotEntryId(entry._id);
+                });
+              }}
+              onMouseLeave={handleActionMouseEnter}
+            />
+          );
+        })}
+      </Box>
+    );
+  };
+
+  if (isEditing) {
+    return (
+      <BaseCard 
+        accentColor={theme.palette.grey[400]}
+        className="action-card"
+      >
+        <Box>
+          <TextField
+            fullWidth
+            label="Title"
+            value={editingAction?.title || ''}
+            onChange={(e) => onEditChange('title', e.target.value)}
+            size="small"
+            sx={{ mb: 2 }}
+          />
+          <TextField
+            fullWidth
+            multiline
+            label="Description"
+            value={editingAction?.description || ''}
+            onChange={(e) => onEditChange('description', e.target.value)}
+            size="small"
+            sx={{ mb: 2 }}
+          />
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
+            <Button size="small" onClick={onEditCancel}>Cancel</Button>
+            <Button size="small" variant="contained" onClick={onEditSave}>Save</Button>
+          </Box>
+        </Box>
+      </BaseCard>
+    );
+  }
 
   return (
-    <Card
+    <BaseCard
       className="action-card"
+      isHighlighted={isHighlighted}
+      accentColor={theme.palette.grey[400]}
+      onMouseEnter={handleActionMouseEnter}
+      onMouseLeave={handleActionMouseLeave}
       onDragOver={onDragOver}
       onDragLeave={onDragLeave}
       onDrop={onDrop}
-      onMouseEnter={handleActionMouseEnter}
-      onMouseLeave={handleActionMouseLeave}
-      sx={{ 
-        position: 'relative',
-        transition: 'all 0.2s ease',
-        cursor: 'pointer',
-        ...(uiStore.hoveredActionId === action._id && {
-          boxShadow: 2,
-          backgroundColor: 'action.hover'
-        })
-      }}
-      onClick={() => !isEditing && setIsExpanded(!isExpanded)}
+      onClick={() => setIsExpanded(!isExpanded)}
+      sx={{ cursor: 'pointer' }}
     >
-      <CardContent>
-        {isEditing ? (
-          <Box>
-            <TextField
-              fullWidth
-              label="Title"
-              value={editingAction?.title || ''}
-              onChange={(e) => onEditChange('title', e.target.value)}
-              size="small"
-              sx={{ mb: 2 }}
-            />
-            <TextField
-              fullWidth
-              multiline
-              rows={2}
-              label="Description"
-              value={editingAction?.description || ''}
-              onChange={(e) => onEditChange('description', e.target.value)}
-              size="small"
-              sx={{ mb: 2 }}
-            />
-            <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-              <Button size="small" onClick={onEditCancel}>Cancel</Button>
-              <Button size="small" variant="contained" onClick={onEditSave}>Save</Button>
-            </Box>
-          </Box>
-        ) : (
-          <>
-            <Box 
+      <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+        <Box sx={{ flex: 1 }}>
+          <Box sx={{ 
+            display: 'flex', 
+            alignItems: 'flex-start',
+            justifyContent: 'space-between',
+            mb: 1
+          }}>
+            <Typography 
+              variant="subtitle1" 
               sx={{ 
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 1,
+                fontWeight: 'medium',
+                flex: 1,
+                mr: 1
               }}
             >
-              <Box sx={{ 
-                display: 'flex', 
-                justifyContent: 'space-between', 
-                alignItems: 'flex-start',
+              {action.title}
+            </Typography>
+            
+            <Box sx={{ 
+              display: 'flex',
+              gap: 0.5,
+              alignItems: 'center',
+              ml: 'auto'
+            }}>
+              <IconButton size="small" onClick={(e) => {
+                e.stopPropagation();
+                onEditStart({ 
+                  id: action._id, 
+                  title: action.title, 
+                  description: action.description,
+                  swotEntries: action.swotEntries || []
+                })
               }}>
-                <Typography variant="h6" sx={{ flex: 1 }}>{action.title}</Typography>
-                <Box onClick={e => e.stopPropagation()}>
-                  <IconButton 
-                    size="small" 
-                    onClick={(e) => {
-                      onEditStart({
-                        id: action._id,
-                        title: action.title,
-                        description: action.description,
-                        swotEntries: action.swotEntries || []
-                      });
-                    }}
-                  >
-                    <EditIcon />
-                  </IconButton>
-                  <IconButton 
-                    size="small" 
-                    onClick={() => onDelete(action)}
-                  >
-                    <DeleteIcon />
-                  </IconButton>
-                  <IconButton 
-                    size="small" 
-                  >
-                    {isExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-                  </IconButton>
-                </Box>
-              </Box>
-
-              {!isExpanded && (
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, pl: 1 }}>
-                  {sortedGroupedEntries.map(([type, entries]) => (
-                    <CompactSwotChip
-                      key={type}
-                      type={type}
-                      count={entries.length}
-                      onMouseEnter={() => handleCompactChipMouseEnter(entries)}
-                      onMouseLeave={handleActionMouseLeave}
-                    />
-                  ))}
-                </Box>
-              )}
+                <EditIcon fontSize="small" />
+              </IconButton>
+              <IconButton size="small" onClick={(e) => {
+                e.stopPropagation();
+                onDelete(action)
+              }}>
+                <DeleteIcon fontSize="small" />
+              </IconButton>
+              <IconButton size="small" onClick={(e) => {
+                e.stopPropagation();
+                setIsExpanded(!isExpanded);
+              }}>
+                {isExpanded ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
+              </IconButton>
             </Box>
+          </Box>
 
-            {isExpanded && (
-              <>
-                <Box sx={{ mt: 1 }}>
-                  <Typography variant="caption" color="text.secondary">
-                    Status: {action.status}
-                  </Typography>
-                </Box>
-                <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
-                  {action.swotEntries?.length > 0 && (
-                    <Typography variant="body2">
-                      To complete this action:
-                    </Typography>
-                  )}
-                  {sortedGroupedEntries.map(([type, entries]) => (
-                    <Box key={type} sx={{ pl: 2 }}>
-                      <Typography variant="body2" sx={{ mb: 1 }}>
-                        {getTypeDescription(type)}{' '}
-                        {entries.length === 1 ? 'this' : 'these'} {type.toLowerCase()}
-                        {entries.length > 1 ? 's' : ''}:
-                      </Typography>
-                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, pl: 2 }}>
-                        {entries.map((entry) => (
-                          <SwotChip
-                            key={entry._id}
-                            entry={entry}
-                            actionId={action._id}
-                            onDelete={onRemoveSwotEntry}
-                            onMouseEnter={handleChipMouseEnter}
-                            onMouseLeave={handleChipMouseLeave}
-                          />
-                        ))}
-                      </Box>
-                    </Box>
-                  ))}
-                  {action.swotEntries?.length === 0 && (
-                    <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
-                      No SWOT entries associated with this action yet. 
-                      Drag and drop entries from the SWOT analysis to create connections.
-                    </Typography>
-                  )}
-                </Box>
-              </>
-            )}
-          </>
-        )}
-      </CardContent>
-    </Card>
+          {isExpanded ? (
+            <>
+              <Typography 
+                variant="body1" 
+                sx={{ 
+                  wordBreak: 'break-word',
+                  whiteSpace: 'pre-wrap',
+                  mr: 2
+                }}
+              >
+                {action.description}
+              </Typography>
+              <Typography 
+                variant="caption" 
+                color="text.secondary"
+                sx={{ display: 'block', mt: 1 }}
+              >
+                Added by {action.createdBy}
+              </Typography>
+              {renderSwotChips()}
+            </>
+          ) : (
+            renderCompactChips()
+          )}
+        </Box>
+      </Box>
+    </BaseCard>
   );
 });
 

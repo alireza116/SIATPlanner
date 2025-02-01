@@ -160,22 +160,6 @@ const ActionList = observer(({ issueId }: ActionListProps) => {
     uiStore.setHoveredActionId(null);
   };
 
-  const handleChipMouseEnter = (entryId: string) => {
-    uiStore.setHoveredSwotEntryId(entryId);
-  };
-
-  const handleChipMouseLeave = (e: React.MouseEvent<HTMLDivElement>, action: Action) => {
-    const relatedTarget = e.relatedTarget as HTMLElement | null;
-    const currentTarget = e.currentTarget as HTMLElement;
-
-    // If moving to another element within the same action card, maintain the action's highlight
-    if (relatedTarget && currentTarget.closest('.action-card')?.contains(relatedTarget)) {
-      handleActionMouseEnter(action);
-    } else {
-      uiStore.setHoveredActionId(null);
-    }
-  };
-
   const handleDeleteActionClick = (action: Action) => {
     setDeleteActionConfirmation(action);
   };

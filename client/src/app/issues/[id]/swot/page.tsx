@@ -55,31 +55,20 @@ const SwotPage = observer(() => {
   if (!issueStore.currentIssue) return <Alert severity="error">Issue not found</Alert>;
 
   const IssueInfo = (
-    <Box sx={{ 
-      p: 4,
-      borderBottom: 1,
-      borderColor: 'divider'
-    }}>
+    <>
       <Typography variant="h4" component="div" gutterBottom>
         {issueStore.currentIssue.title}
       </Typography>
       <Typography variant="body1" color="text.secondary">
         {issueStore.currentIssue.description}
       </Typography>
-    </Box>
+    </>
   );
 
   return (
-    <Box sx={{ 
-      display: 'flex',
-      flexDirection: 'column',
-      height: '100%'
-    }}>
-      {/* Issue Information - shown in both mobile and desktop */}
-      {IssueInfo}
-
+    <>
       {isMobile ? (
-        <Box sx={{ flex: 1, overflow: 'hidden' }}>
+        <Box sx={{ flex: 1 }}>
           <MobileTabs labels={['SWOT Analysis', 'Actions']}>
             {[
               <SwotContent key="swot" issueId={id as string} />,
@@ -90,31 +79,33 @@ const SwotPage = observer(() => {
       ) : (
         <Box sx={{ 
           display: 'flex',
-          flex: 1,
-          flexGrow: 1
+          flexGrow:1
         }}>
           {/* Left Side - SWOT Analysis */}
           <Box sx={{ 
             flex: 1,
             display: 'flex',
             flexDirection: 'column',
+            flexGrow: 1
           }}>
             {/* SWOT Content */}
-            <Box sx={{ 
-              flex: 1,
-              overflow: 'auto',
-              p: 4,
+            <Box sx={{
+              p:4,
+              borderBottom: 1,
+              borderColor: 'divider',
+              marginBottom: 2
+            }}>
+              {IssueInfo}
+            </Box>
+            <Box sx={{
+              pr:4,
+              pl:4,
               flexGrow: 1
             }}>
-              <Box sx={{ 
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 4,
-                height: '100%'
-              }}>
-                <SwotContent issueId={id as string} />
-              </Box>
+              <SwotContent issueId={id as string} />
             </Box>
+ 
+
           </Box>
 
           {/* Right Side - Actions */}
@@ -122,17 +113,13 @@ const SwotPage = observer(() => {
             width: 400,
             borderLeft: 1,
             borderColor: 'divider',
-            display: 'flex',
-            flexDirection: 'column',
-            padding: 3,
-            height: '100%',
-            overflow: 'auto'
+            p: 4,
           }}>
             <ActionList issueId={id as string} />
           </Box>
         </Box>
       )}
-    </Box>
+    </>
   );
 });
 

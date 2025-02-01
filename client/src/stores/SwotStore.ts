@@ -2,7 +2,7 @@ import { makeAutoObservable, runInAction } from 'mobx';
 import axios from 'axios';
 import { actionStore } from '../stores/ActionStore';
 
-interface SwotEntry {
+export interface SwotEntry {
   _id: string;
   issueId: string;
   type: 'Strength' | 'Weakness' | 'Opportunity' | 'Threat';
@@ -63,7 +63,18 @@ class SwotStore {
     this.loading = true;
     this.error = null;
     try {
-      const response = await axios.put(`${this.baseUrl}/api/swot-entries/${id}`, updates);
+      console.log('Updating SWOT entry:', {
+        id,
+        updates,
+        requestBody: { description: updates.description }
+      });
+      
+      const response = await axios.put(`${this.baseUrl}/api/swot-entries/${id}`, {
+        description: updates.description
+      });
+      
+      console.log('Update response:', response.data);
+      
       runInAction(() => {
         const index = this.entries.findIndex(entry => entry._id === id);
         if (index !== -1) {
@@ -71,7 +82,6 @@ class SwotStore {
         }
         this.loading = false;
       });
-      // Notify ActionStore to update this entry in all actions
       actionStore.updateSwotEntryInActions(id, response.data);
       return response.data;
     } catch (error) {
