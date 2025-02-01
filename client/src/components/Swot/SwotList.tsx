@@ -99,7 +99,12 @@ const SwotList = observer(({
   };
 
   return (
-    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+    <Box sx={{ 
+      height: { xs: 'auto', md: '100%' }, 
+      display: 'flex', 
+      flexDirection: 'column',
+      mb: { xs: 2, md: 0 }
+    }}>
       <Box
         sx={{
           p: 2,
@@ -107,7 +112,7 @@ const SwotList = observer(({
           color: theme.palette.getContrastText(headerColor || getSwotColor(category, theme).light),
           borderRadius: 1,
           mb: 2,
-          opacity: 0.95,
+          opacity: 1,
         }}
       >
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

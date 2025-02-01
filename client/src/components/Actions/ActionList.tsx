@@ -149,11 +149,11 @@ const ActionList = observer(({ issueId }: ActionListProps) => {
 
   const handleActionMouseLeave = (e: React.MouseEvent<HTMLDivElement>) => {
     // Check if we're moving to a child element
-    const relatedTarget = e.relatedTarget as HTMLElement;
+    const relatedTarget = e.relatedTarget as HTMLElement | null;
     const currentTarget = e.currentTarget as HTMLElement;
     
     // Don't clear highlighting if moving to a child element (like a chip)
-    if (currentTarget.contains(relatedTarget)) {
+    if (relatedTarget && currentTarget.contains(relatedTarget)) {
       return;
     }
     
@@ -165,8 +165,15 @@ const ActionList = observer(({ issueId }: ActionListProps) => {
   };
 
   const handleChipMouseLeave = (e: React.MouseEvent<HTMLDivElement>, action: Action) => {
-    // When leaving a chip, highlight the parent action's entries
-    handleActionMouseEnter(action);
+    const relatedTarget = e.relatedTarget as HTMLElement | null;
+    const currentTarget = e.currentTarget as HTMLElement;
+
+    // If moving to another element within the same action card, maintain the action's highlight
+    if (relatedTarget && currentTarget.closest('.action-card')?.contains(relatedTarget)) {
+      handleActionMouseEnter(action);
+    } else {
+      uiStore.setHoveredActionId(null);
+    }
   };
 
   const handleDeleteActionClick = (action: Action) => {
@@ -205,19 +212,39 @@ const ActionList = observer(({ issueId }: ActionListProps) => {
   };
 
   return (
-    <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Typography variant="h6" component="div">
-          Actions
+    <Box sx={{ 
+      display: 'flex', 
+      flexDirection: 'column',
+      height: '100%' // Make sure the container takes full height
+    }}>
+      {/* Header section - stays fixed */}
+      <Box sx={{ mb: 2 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+          <Typography variant="h6">Actions</Typography>
+          <Button
+            variant="contained"
+            size="small"
+            startIcon={<AddIcon />}
+            onClick={() => setIsAdding(true)}
+          >
+            Add Action
+          </Button>
+        </Box>
+        <Typography variant="body2" color="text.secondary">
+          Create actions to address the SWOT entries. Drag and drop entries onto actions to create connections.
         </Typography>
-        <IconButton onClick={() => setIsAdding(true)}>
-          <AddIcon />
-        </IconButton>
       </Box>
 
-      <Stack spacing={2}>
+      {/* Scrollable content section */}
+      <Box sx={{ 
+        flex: 1,
+        overflowY: 'auto',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 2
+      }}>
         {isAdding && (
-          <Card key="new-action-card" variant="outlined">
+          <Card>
             <CardContent>
               <TextField
                 fullWidth
@@ -269,9 +296,9 @@ const ActionList = observer(({ issueId }: ActionListProps) => {
             onDrop={(e) => handleDrop(e, action._id)}
           />
         ))}
-      </Stack>
+      </Box>
 
-      {/* Delete Action Confirmation Modal */}
+      {/* Modals stay at the bottom */}
       <MessageModal
         open={deleteActionConfirmation !== null}
         title="Delete Action"
@@ -289,7 +316,6 @@ const ActionList = observer(({ issueId }: ActionListProps) => {
         severity="warning"
       />
 
-      {/* Delete SWOT Association Confirmation Modal */}
       <MessageModal
         open={deleteAssociationConfirmation !== null}
         title="Remove Association"

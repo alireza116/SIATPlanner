@@ -158,6 +158,7 @@ const ActionCard = observer(({
 
   return (
     <Card
+      className="action-card"
       onDragOver={onDragOver}
       onDragLeave={onDragLeave}
       onDrop={onDrop}

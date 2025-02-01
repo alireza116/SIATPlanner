@@ -3,23 +3,27 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { observer } from 'mobx-react-lite';
 import { useStore } from '@/stores/StoreProvider';
-import SwotList from '@/components/Swot/SwotList';
+import SwotContent from '@/components/Swot/SwotContent';
 import ActionList from '@/components/Actions/ActionList';
 import {
-  Container,
   Typography,
   Box,
   CircularProgress,
   Alert,
-  Divider,
+  useTheme,
+  useMediaQuery,
 } from '@mui/material';
+import MobileTabs from '@/components/Common/MobileTabs';
 
 const SwotPage = observer(() => {
   const { id } = useParams();
-  const { issueStore, swotStore, actionStore, uiStore } = useStore();
+  const { issueStore, swotStore, actionStore } = useStore();
   const [isClient, setIsClient] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   useEffect(() => {
     setIsClient(true);
@@ -50,99 +54,85 @@ const SwotPage = observer(() => {
   if (error) return <Alert severity="error">{error}</Alert>;
   if (!issueStore.currentIssue) return <Alert severity="error">Issue not found</Alert>;
 
-  const categorizeSwotEntries = () => {
-    return {
-      Strength: swotStore.entries.filter(entry => entry.type === 'Strength'),
-      Weakness: swotStore.entries.filter(entry => entry.type === 'Weakness'),
-      Opportunity: swotStore.entries.filter(entry => entry.type === 'Opportunity'),
-      Threat: swotStore.entries.filter(entry => entry.type === 'Threat'),
-    };
-  };
-
-  const swotCategories = categorizeSwotEntries();
+  const IssueInfo = (
+    <Box sx={{ 
+      p: 4,
+      borderBottom: 1,
+      borderColor: 'divider'
+    }}>
+      <Typography variant="h4" component="div" gutterBottom>
+        {issueStore.currentIssue.title}
+      </Typography>
+      <Typography variant="body1" color="text.secondary">
+        {issueStore.currentIssue.description}
+      </Typography>
+    </Box>
+  );
 
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
-      <Box mb={4}>
-        <Typography variant="h4" component="div" gutterBottom>
-          {issueStore.currentIssue.title}
-        </Typography>
-        <Typography variant="body1" component="div" color="text.secondary" paragraph>
-          {issueStore.currentIssue.description}
-        </Typography>
-      </Box>
+    <Box sx={{ 
+      display: 'flex',
+      flexDirection: 'column',
+      height: '100%'
+    }}>
+      {/* Issue Information - shown in both mobile and desktop */}
+      {IssueInfo}
 
-      <Box sx={{ display: 'flex', gap: 4 }}>
-        {/* Internal Factors Section */}
-        <Box sx={{ flex: 1 }}>
-          <Box sx={{ mb: 3 }}>
-            <Typography variant="h6" component="div" color="text.secondary" align="center" gutterBottom>
-              Internal Factors
-            </Typography>
-            <Divider />
+      {isMobile ? (
+        <Box sx={{ flex: 1, overflow: 'hidden' }}>
+          <MobileTabs labels={['SWOT Analysis', 'Actions']}>
+            {[
+              <SwotContent key="swot" issueId={id as string} />,
+              <ActionList key="actions" issueId={id as string} />
+            ]}
+          </MobileTabs>
+        </Box>
+      ) : (
+        <Box sx={{ 
+          display: 'flex',
+          flex: 1,
+          flexGrow: 1
+        }}>
+          {/* Left Side - SWOT Analysis */}
+          <Box sx={{ 
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+          }}>
+            {/* SWOT Content */}
+            <Box sx={{ 
+              flex: 1,
+              overflow: 'auto',
+              p: 4,
+              flexGrow: 1
+            }}>
+              <Box sx={{ 
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 4,
+                height: '100%'
+              }}>
+                <SwotContent issueId={id as string} />
+              </Box>
+            </Box>
           </Box>
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            <Box sx={{ flex: 1 }}>
-              <SwotList
-                category="Strength"
-                displayText="Strengths"
-                subtitle="Attributes and resources that provide an advantage"
-                issueId={id as string}
-                entries={swotCategories.Strength}
-                highlightedEntryId={uiStore.hoveredSwotEntryId}
-              />
-            </Box>
-            <Box sx={{ flex: 1 }}>
-              <SwotList
-                category="Weakness"
-                displayText="Weaknesses"
-                subtitle="Limitations or areas needing improvement"
-                issueId={id as string}
-                entries={swotCategories.Weakness}
-                highlightedEntryId={uiStore.hoveredSwotEntryId}
-              />
-            </Box>
+
+          {/* Right Side - Actions */}
+          <Box sx={{ 
+            width: 400,
+            borderLeft: 1,
+            borderColor: 'divider',
+            display: 'flex',
+            flexDirection: 'column',
+            padding: 3,
+            height: '100%',
+            overflow: 'auto'
+          }}>
+            <ActionList issueId={id as string} />
           </Box>
         </Box>
-
-        {/* External Factors Section */}
-        <Box sx={{ flex: 1 }}>
-          <Box sx={{ mb: 3 }}>
-            <Typography variant="h6" component="div" color="text.secondary" align="center" gutterBottom>
-              External Factors
-            </Typography>
-            <Divider />
-          </Box>
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            <Box sx={{ flex: 1 }}>
-              <SwotList
-                category="Opportunity"
-                displayText="Opportunities"
-                subtitle="Factors or trends that can be leveraged for growth"
-                issueId={id as string}
-                entries={swotCategories.Opportunity}
-                highlightedEntryId={uiStore.hoveredSwotEntryId}
-              />
-            </Box>
-            <Box sx={{ flex: 1 }}>
-              <SwotList
-                category="Threat"
-                displayText="Threats"
-                subtitle="External factors that could cause challenges or risks"
-                issueId={id as string}
-                entries={swotCategories.Threat}
-                highlightedEntryId={uiStore.hoveredSwotEntryId}
-              />
-            </Box>
-          </Box>
-        </Box>
-
-        {/* Actions Section */}
-        <Box sx={{ flex: 1 }}>
-          <ActionList issueId={id as string} />
-        </Box>
-      </Box>
-    </Container>
+      )}
+    </Box>
   );
 });
 
