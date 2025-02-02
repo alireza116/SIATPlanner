@@ -250,7 +250,7 @@ const ActionCard = observer(({
             value={editingAction?.description || ''}
             onChange={(e) => onEditChange('description', e.target.value)}
             size="small"
-            sx={{ mb: 2 }}
+            sx={{ mb: 1 }}
           />
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
             <Button size="small" onClick={onEditCancel}>Cancel</Button>

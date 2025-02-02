@@ -21,6 +21,7 @@ import MessageModal from '@/components/Common/MessageModal';
 import { Action, SwotEntry } from '@/stores/ActionStore';
 import { getSwotChipColor, getSwotColor } from '@/theme/swotTheme';
 import ActionCard from './ActionCard';
+import BaseCard from '@/components/Common/BaseCard';
 
 interface ActionListProps {
   issueId: string;
@@ -132,34 +133,6 @@ const ActionList = observer(({ issueId }: ActionListProps) => {
     }
   };
 
-  const handleRemoveSwotEntry = async (actionId: string, swotEntryId: string) => {
-    try {
-      await actionStore.removeSwotEntryFromAction(actionId, swotEntryId);
-    } catch (error) {
-      console.error('Failed to remove SWOT entry:', error);
-    }
-  };
-
-  const handleActionMouseEnter = (action: Action) => {
-    uiStore.setHoveredActionId(
-      action._id,
-      action.swotEntries?.map(entry => entry._id) || []
-    );
-  };
-
-  const handleActionMouseLeave = (e: React.MouseEvent<HTMLDivElement>) => {
-    // Check if we're moving to a child element
-    const relatedTarget = e.relatedTarget as HTMLElement | null;
-    const currentTarget = e.currentTarget as HTMLElement;
-    
-    // Don't clear highlighting if moving to a child element (like a chip)
-    if (relatedTarget && currentTarget.contains(relatedTarget)) {
-      return;
-    }
-    
-    uiStore.setHoveredActionId(null);
-  };
-
   const handleDeleteActionClick = (action: Action) => {
     setDeleteActionConfirmation(action);
   };
@@ -199,13 +172,14 @@ const ActionList = observer(({ issueId }: ActionListProps) => {
     <Box sx={{ 
       display: 'flex', 
       flexDirection: 'column',
-      height: '100%' // Make sure the container takes full height
+      height: '100%',
     }}>
       {/* Header section - stays fixed */}
-      <Box sx={{ mb: 2 }}>
+      <Box sx={{ mb: 2, flexShrink: 0, px:4, py:3, borderBottom: 1, borderColor: 'divider' }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
           <Typography variant="h6">Actions</Typography>
           <Button
+
             variant="contained"
             size="small"
             startIcon={<AddIcon />}
@@ -221,64 +195,72 @@ const ActionList = observer(({ issueId }: ActionListProps) => {
 
       {/* Scrollable content section */}
       <Box sx={{ 
-        flex: 1,
-        overflowY: 'auto',
+        flexGrow: 1,
+        overflow: 'auto',
         display: 'flex',
         flexDirection: 'column',
-        gap: 2
+        gap: 3,
+        px: 2,
+        '& > *': {
+          flexShrink: 0
+        }
       }}>
         {isAdding && (
-          <Card>
-            <CardContent>
-              <TextField
-                fullWidth
-                label="Title"
-                value={newAction.title}
-                onChange={(e) => setNewAction({ ...newAction, title: e.target.value })}
-                size="small"
-                sx={{ mb: 2 }}
-              />
-              <TextField
-                fullWidth
-                multiline
-                rows={2}
-                label="Description"
-                value={newAction.description}
-                onChange={(e) => setNewAction({ ...newAction, description: e.target.value })}
-                size="small"
-                sx={{ mb: 2 }}
-              />
-              {validationError && (
-                <Alert severity="error" sx={{ mt: 1, mb: 1 }}>
-                  {validationError}
-                </Alert>
-              )}
-              <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-                <Button size="small" onClick={() => setIsAdding(false)}>Cancel</Button>
-                <Button size="small" variant="contained" onClick={handleAddAction}>Add</Button>
-              </Box>
-            </CardContent>
-          </Card>
+          <Box sx={{ flexShrink: 0 }}>
+            <BaseCard>
+              <CardContent>
+                <TextField
+                  fullWidth
+                  label="New Action Title"
+                  value={newAction.title}
+                  onChange={(e) => setNewAction({ ...newAction, title: e.target.value })}
+                  size="small"
+                  sx={{ mb: 2 }}
+                />
+                <TextField
+                  fullWidth
+                  multiline
+                  rows={2}
+                  label="New Action Description"
+                  value={newAction.description}
+                  onChange={(e) => setNewAction({ ...newAction, description: e.target.value })}
+                  size="small"
+                  sx={{ mb: 2 }}
+                />
+                {validationError && (
+                  <Alert severity="error" sx={{ mt: 1, mb: 1 }}>
+                    {validationError}
+                  </Alert>
+                )}
+                <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
+                  <Button size="small" onClick={() => setIsAdding(false)}>Cancel</Button>
+                  <Button size="small" variant="contained" onClick={handleAddAction}>Add</Button>
+                </Box>
+              </CardContent>
+            </BaseCard>
+          </Box>
         )}
 
         {actionStore.actions.map((action) => (
-          <ActionCard
-            key={action._id}
-            action={action}
-            isEditing={editingAction?.id === action._id}
-            editingAction={editingAction}
-            onEditStart={setEditingAction}
-            onEditChange={(field, value) => 
-              setEditingAction(prev => prev ? { ...prev, [field]: value } : null)
-            }
-            onEditSave={handleEditAction}
-            onEditCancel={() => setEditingAction(null)}
-            onDelete={handleDeleteActionClick}
-            onRemoveSwotEntry={handleRemoveSwotEntryClick}
-            onDragOver={(e) => handleDragOver(e, action._id)}
-            onDragLeave={handleDragLeave}
-            onDrop={(e) => handleDrop(e, action._id)}
-          />
+          <Box sx={{ flexShrink: 0 }}>
+            <ActionCard
+              key={action._id}
+              action={action}
+              isEditing={editingAction?.id === action._id}
+              editingAction={editingAction}
+              onEditStart={setEditingAction}
+              onEditChange={(field, value) => 
+                setEditingAction(prev => prev ? { ...prev, [field]: value } : null)
+              }
+              onEditSave={handleEditAction}
+              onEditCancel={() => setEditingAction(null)}
+              onDelete={handleDeleteActionClick}
+              onRemoveSwotEntry={handleRemoveSwotEntryClick}
+              onDragOver={(e) => handleDragOver(e, action._id)}
+              onDragLeave={handleDragLeave}
+              onDrop={(e) => handleDrop(e, action._id)}
+            />
+          </Box>
         ))}
       </Box>
 

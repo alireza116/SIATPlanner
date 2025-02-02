@@ -79,7 +79,7 @@ const SwotPage = observer(() => {
       ) : (
         <Box sx={{ 
           display: 'flex',
-          flexGrow:1
+          height: '100%'
         }}>
           {/* Left Side - SWOT Analysis */}
           <Box sx={{ 
@@ -113,10 +113,12 @@ const SwotPage = observer(() => {
             width: 400,
             borderLeft: 1,
             borderColor: 'divider',
-            p: 4,
+            height: '100%',
+
           }}>
             <ActionList issueId={id as string} />
           </Box>
+
         </Box>
       )}
     </>

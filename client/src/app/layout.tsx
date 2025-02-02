@@ -4,7 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { StoreProvider } from '@/stores/StoreProvider';
 import NavBar from '@/components/NavBar/NavBar';
-import { Stack } from "@mui/material";
+import { Box, Stack } from "@mui/material";
 
 export default function RootLayout({
   children,
@@ -17,7 +17,9 @@ export default function RootLayout({
         <StoreProvider>
           <Stack direction="column" height="100%">
           <NavBar />
-          {children}
+          <Box sx={{ flexGrow: 1, overflow: 'auto' }}>
+              {children}
+            </Box>
 
           </Stack>
         </StoreProvider>
