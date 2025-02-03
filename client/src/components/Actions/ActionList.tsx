@@ -18,10 +18,12 @@ import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import MessageModal from '@/components/Common/MessageModal';
-import { Action, SwotEntry } from '@/stores/ActionStore';
+import { Action } from '@/stores/ActionStore';
+import { SwotEntry } from '@/stores/SwotStore';
 import { getSwotChipColor, getSwotColor } from '@/theme/swotTheme';
 import ActionCard from './ActionCard';
 import BaseCard from '@/components/Common/BaseCard';
+
 
 interface ActionListProps {
   issueId: string;
@@ -199,7 +201,7 @@ const ActionList = observer(({ issueId }: ActionListProps) => {
         overflow: 'auto',
         display: 'flex',
         flexDirection: 'column',
-        gap: 3,
+        gap:2,
         px: 2,
         '& > *': {
           flexShrink: 0
@@ -242,9 +244,8 @@ const ActionList = observer(({ issueId }: ActionListProps) => {
         )}
 
         {actionStore.actions.map((action) => (
-          <Box sx={{ flexShrink: 0 }}>
+          <Box key={action._id} sx={{ flexShrink: 0 }}>
             <ActionCard
-              key={action._id}
               action={action}
               isEditing={editingAction?.id === action._id}
               editingAction={editingAction}

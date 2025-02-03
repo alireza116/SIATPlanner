@@ -3,7 +3,7 @@ import { observer } from 'mobx-react-lite';
 import { useStore } from '@/stores/StoreProvider';
 import { useTheme } from '@mui/material/styles';
 import { getSwotColor } from '@/theme/swotTheme';
-import { SwotEntry } from '@/stores/ActionStore';
+import { SwotEntry } from '@/stores/SwotStore';
 
 interface SwotChipProps {
   entry: SwotEntry;

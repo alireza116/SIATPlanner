@@ -1,20 +1,14 @@
 import { makeAutoObservable, runInAction } from 'mobx';
 import axios from 'axios';
+import { SwotEntry } from './SwotStore';
 
-export interface SwotEntry {
-  _id: string;
-  type: 'Strength' | 'Weakness' | 'Opportunity' | 'Threat';
-  description: string;
-  createdBy: string;
-  createdAt: string;
-  updatedAt: string;
-}
 
 export interface Action {
   _id: string;
   issueId: string;
   title: string;
   description: string;
+  detail?: string;
   status: 'Pending' | 'In Progress' | 'Completed';
   swotEntries: SwotEntry[];
   createdBy: string;
@@ -173,6 +167,80 @@ class ActionStore {
         ) || []
       }));
     });
+  }
+
+  async updateActionDetail(id: string, detail: string) {
+    this.loading = true;
+    this.error = null;
+    try {
+      await axios.put(`${this.baseUrl}/api/actions/${id}/detail`, { detail });
+      runInAction(() => {
+        const index = this.actions.findIndex(action => action._id === id);
+        if (index !== -1) {
+          this.actions[index] = {
+            ...this.actions[index],
+            detail
+          };
+        }
+        this.loading = false;
+      });
+    } catch (error: any) {
+      runInAction(() => {
+        this.error = error.message || 'Failed to update action detail';
+        this.loading = false;
+      });
+      throw error;
+    }
+  }
+
+  async deleteActionDetail(id: string) {
+    this.loading = true;
+    this.error = null;
+    try {
+      const response = await axios.delete(`${this.baseUrl}/api/actions/${id}/detail`);
+      runInAction(() => {
+        const index = this.actions.findIndex(action => action._id === id);
+        if (index !== -1) {
+          this.actions[index] = {
+            ...this.actions[index],
+            detail: ''
+          };
+        }
+        this.loading = false;
+      });
+      return response.data;
+    } catch (error: any) {
+      runInAction(() => {
+        this.error = error.message || 'Failed to delete action detail';
+        this.loading = false;
+      });
+      throw error;
+    }
+  }
+
+  async fetchActionDetail(id: string) {
+    this.loading = true;
+    this.error = null;
+    try {
+      const response = await axios.get(`${this.baseUrl}/api/actions/${id}/detail`);
+      runInAction(() => {
+        const index = this.actions.findIndex(action => action._id === id);
+        if (index !== -1) {
+          this.actions[index] = {
+            ...this.actions[index],
+            detail: response.data.detail
+          };
+        }
+        this.loading = false;
+      });
+      return response.data.detail;
+    } catch (error: any) {
+      runInAction(() => {
+        this.error = error.message || 'Failed to fetch action detail';
+        this.loading = false;
+      });
+      throw error;
+    }
   }
 }
 

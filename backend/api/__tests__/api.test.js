@@ -26,7 +26,7 @@ afterAll(async () => {
 describe("API Integration Tests", () => {
   let issueId, swotId, goalId, actionId, relationId;
 
-  // Test Issue CRUD
+  // Test Issues
   describe("Issues API", () => {
     const testIssue = {
       title: "Test Issue",
@@ -49,6 +49,21 @@ describe("API Integration Tests", () => {
       expect(response.status).toBe(200);
       expect(Array.isArray(response.body)).toBeTruthy();
       expect(response.body.length).toBeGreaterThan(0);
+    });
+
+    test("Should get a single issue", async () => {
+      const response = await request(app).get(`/api/issues/${issueId}`);
+      expect(response.status).toBe(200);
+      expect(response.body._id).toBe(issueId);
+    });
+
+    test("Should update an issue", async () => {
+      const updates = { title: "Updated Title" };
+      const response = await request(app)
+        .put(`/api/issues/${issueId}`)
+        .send(updates);
+      expect(response.status).toBe(200);
+      expect(response.body.title).toBe(updates.title);
     });
   });
 
@@ -79,6 +94,15 @@ describe("API Integration Tests", () => {
       expect(Array.isArray(response.body)).toBeTruthy();
       expect(response.body.length).toBeGreaterThan(0);
     });
+
+    test("Should update a SWOT entry", async () => {
+      const updates = { description: "Updated SWOT Entry" };
+      const response = await request(app)
+        .put(`/api/swot-entries/${swotId}`)
+        .send(updates);
+      expect(response.status).toBe(200);
+      expect(response.body.description).toBe(updates.description);
+    });
   });
 
   // Test Goals
@@ -106,12 +130,22 @@ describe("API Integration Tests", () => {
       expect(Array.isArray(response.body)).toBeTruthy();
       expect(response.body.length).toBeGreaterThan(0);
     });
+
+    test("Should update a goal", async () => {
+      const updates = { description: "Updated Goal" };
+      const response = await request(app)
+        .put(`/api/goals/${goalId}`)
+        .send(updates);
+      expect(response.status).toBe(200);
+      expect(response.body.description).toBe(updates.description);
+    });
   });
 
   // Test Actions
   describe("Actions API", () => {
     const testAction = {
-      description: "Test Action",
+      title: "Test Action",
+      description: "Test Action Description",
       status: "Pending",
       createdBy: "Test User",
     };
@@ -132,6 +166,32 @@ describe("API Integration Tests", () => {
       expect(response.status).toBe(200);
       expect(Array.isArray(response.body)).toBeTruthy();
       expect(response.body.length).toBeGreaterThan(0);
+    });
+
+    test("Should update an action", async () => {
+      const updates = { description: "Updated Action" };
+      const response = await request(app)
+        .put(`/api/actions/${actionId}`)
+        .send(updates);
+      expect(response.status).toBe(200);
+      expect(response.body.description).toBe(updates.description);
+    });
+
+    test("Should update action details", async () => {
+      const detail = "<p>Test action detail with rich text</p>";
+      const response = await request(app)
+        .put(`/api/actions/${actionId}/detail`)
+        .send({ detail });
+      expect(response.status).toBe(200);
+      expect(response.body.detail).toBe(detail);
+    });
+
+    test("Should get action details", async () => {
+      const response = await request(app).get(
+        `/api/actions/${actionId}/detail`
+      );
+      expect(response.status).toBe(200);
+      expect(response.body.detail).toBeTruthy();
     });
   });
 
@@ -162,6 +222,15 @@ describe("API Integration Tests", () => {
       expect(response.status).toBe(200);
       expect(Array.isArray(response.body)).toBeTruthy();
       expect(response.body.length).toBeGreaterThan(0);
+    });
+
+    test("Should update a relation", async () => {
+      const updates = { reasoning: "Updated reasoning" };
+      const response = await request(app)
+        .put(`/api/action-swot-relations/${relationId}`)
+        .send(updates);
+      expect(response.status).toBe(200);
+      expect(response.body.reasoning).toBe(updates.reasoning);
     });
   });
 

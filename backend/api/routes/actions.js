@@ -125,4 +125,54 @@ router.delete("/:id/swot-entries/:swotEntryId", async (req, res) => {
   }
 });
 
+// Get action detail
+router.get("/:id/detail", async (req, res) => {
+  try {
+    const action = await Action.findById(req.params.id);
+    if (!action) {
+      return res.status(404).json({ message: "Action not found" });
+    }
+    res.json({ detail: action.detail || "" });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// Add or update action detail
+router.put("/:id/detail", async (req, res) => {
+  try {
+    const { detail } = req.body;
+    const action = await Action.findById(req.params.id);
+
+    if (!action) {
+      return res.status(404).json({ message: "Action not found" });
+    }
+
+    action.detail = detail;
+    await action.save();
+
+    res.json(action);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// Remove action detail
+router.delete("/:id/detail", async (req, res) => {
+  try {
+    const action = await Action.findById(req.params.id);
+
+    if (!action) {
+      return res.status(404).json({ message: "Action not found" });
+    }
+
+    action.detail = ""; // Clear the detail field
+    await action.save();
+
+    res.json(action);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
 module.exports = router;

@@ -11,12 +11,18 @@ class UiStore {
 
   setHoveredActionId(id: string | null, swotEntryIds: string[] = []) {
     this.hoveredActionId = id;
-    this.highlightedSwotEntryIds = new Set(id ? swotEntryIds : []);
+    this.highlightedSwotEntryIds = new Set(swotEntryIds);
   }
 
   setHoveredSwotEntryId(id: string | null) {
     this.hoveredSwotEntryId = id;
     this.highlightedSwotEntryIds = new Set(id ? [id] : []);
+  }
+
+  clearHoveredIds() {
+    this.hoveredActionId = null;
+    this.hoveredSwotEntryId = null;
+    this.highlightedSwotEntryIds = new Set();
   }
 
   isSwotEntryHighlighted(id: string): boolean {

@@ -7,10 +7,15 @@ const ActionSchema = new mongoose.Schema(
       ref: "Issue",
       required: true,
     },
+    detail: {
+      type: String,
+      default: "",
+    },
     title: {
       type: String,
       required: true,
     },
+
     description: {
       type: String,
       required: true,

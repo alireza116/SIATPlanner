@@ -1,4 +1,4 @@
-import { DragEvent, useState } from 'react';
+import { DragEvent, useState, useRef } from 'react';
 import { observer } from 'mobx-react-lite';
 import {
   Typography,
@@ -7,17 +7,21 @@ import {
   Button,
   Box,
   Chip,
+  CardContent,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import { Action, SwotEntry } from '@/stores/ActionStore';
+import OpenInFullIcon from '@mui/icons-material/OpenInFull';
+import { Action } from '@/stores/ActionStore';
+import { SwotEntry } from '@/stores/SwotStore';
 import SwotChip from './SwotChip';
 import { useStore } from '@/stores/StoreProvider';
 import { useTheme } from '@mui/material/styles';
 import { getSwotColor, SwotTheme } from '@/theme/swotTheme';
 import BaseCard from '../Common/BaseCard';
+import ActionDetailModal from './ActionDetailModal';
 
 interface ActionCardProps {
   action: Action;
@@ -38,8 +42,6 @@ interface ActionCardProps {
 }
 
 const SWOT_TYPE_ORDER = ['Strength', 'Weakness', 'Opportunity', 'Threat'] as const;
-
-
 
 const getTypeDescription = (type: string) => {
   switch (type) {
@@ -68,8 +70,6 @@ const getTypePlural = (type: string) => {
       return 'strengths';
     default:
       return `${type.toLowerCase()}s`;
-
-
   }
 };
 
@@ -121,23 +121,23 @@ const ActionCard = observer(({
   const theme = useTheme();
   const { uiStore } = useStore();
   const [isExpanded, setIsExpanded] = useState(true);
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const actionRef = useRef<HTMLDivElement | null>(null);
 
   const handleActionMouseEnter = () => {
-    uiStore.setHoveredActionId(
-      action._id,
-      action.swotEntries?.map(entry => entry._id) || []
-    );
+    setIsHovered(true);
+    uiStore.setHoveredActionId(action._id, action.swotEntries?.map(entry => entry._id) || []);
   };
 
-  const handleActionMouseLeave = (e: React.MouseEvent<HTMLDivElement>) => {
-    const relatedTarget = e.relatedTarget as HTMLElement | null;
-    const currentTarget = e.currentTarget as HTMLElement;
-    
-    if (relatedTarget && currentTarget.contains(relatedTarget)) {
-      return;
-    }
-    
-    uiStore.setHoveredActionId(null);
+  const handleActionMouseLeave = (event: React.MouseEvent<HTMLDivElement>) => {
+    const relatedTarget = event.relatedTarget as Node | null;
+    const currentTarget = event.currentTarget;
+
+ 
+
+    setIsHovered(false);
+    uiStore.clearHoveredIds();
   };
 
   const handleChipMouseEnter = (entryId: string) => {
@@ -147,7 +147,6 @@ const ActionCard = observer(({
   const handleChipMouseLeave = (e: React.MouseEvent<HTMLDivElement>) => {
     handleActionMouseEnter();
   };
-
 
   const renderSwotChips = () => {
     if (!action.swotEntries?.length) return null;
@@ -273,6 +272,7 @@ const ActionCard = observer(({
       onDrop={onDrop}
       onClick={() => setIsExpanded(!isExpanded)}
       sx={{ cursor: 'pointer' }}
+      ref={actionRef}
     >
       <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
         <Box sx={{ flex: 1 }}>
@@ -332,25 +332,51 @@ const ActionCard = observer(({
                 sx={{ 
                   wordBreak: 'break-word',
                   whiteSpace: 'pre-wrap',
-                  mr: 2
+                  mr: 2,
+                  mb: 2
                 }}
               >
                 {action.description}
               </Typography>
-              <Typography 
-                variant="caption" 
-                color="text.secondary"
-                sx={{ display: 'block', mt: 1 }}
-              >
-                Added by {action.createdBy}
-              </Typography>
+              <hr />
               {renderSwotChips()}
+              <Box sx={{ 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'center',
+                mt: 2 
+              }}>
+                <Typography 
+                  variant="caption" 
+                  color="text.secondary"
+                >
+                  Added by {action.createdBy}
+                </Typography>
+                <Button
+                  size="small"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setDetailModalOpen(true);
+                  }}
+                  startIcon={<OpenInFullIcon />}
+                >
+                  Action Details
+                </Button>
+              </Box>
             </>
           ) : (
             renderCompactChips()
           )}
         </Box>
       </Box>
+      
+      {detailModalOpen && (
+        <ActionDetailModal
+          action={action}
+          open={detailModalOpen}
+          onClose={() => setDetailModalOpen(false)}
+        />
+      )}
     </BaseCard>
   );
 });
