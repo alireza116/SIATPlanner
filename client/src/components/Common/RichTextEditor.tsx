@@ -49,7 +49,14 @@ const RichTextEditor = ({ value, onChange, readOnly = false, id }: RichTextEdito
   }, [value, editor]);
 
   return (
-    <div style={{ height: '100%', backgroundColor: 'white', border: '1px solid #ccc' }}>
+    <div style={{ 
+      display: 'flex', 
+      flexDirection: 'column',
+      minHeight: '400px', // minimum height
+      height: 'auto', // allow growing
+      backgroundColor: 'white', 
+      border: '1px solid #ccc' 
+    }}>
       {!readOnly && (
         <div className="editor-toolbar">
           <div className="toolbar-group">
@@ -144,7 +151,13 @@ const RichTextEditor = ({ value, onChange, readOnly = false, id }: RichTextEdito
           </div>
         </div>
       )}
-      <EditorContent editor={editor} />
+      <div style={{ 
+        flex: 1,
+        overflow: 'auto',
+        position: 'relative'
+      }}>
+        <EditorContent editor={editor} />
+      </div>
     </div>
   );
 };

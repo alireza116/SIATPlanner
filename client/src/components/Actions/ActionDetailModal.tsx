@@ -120,19 +120,21 @@ const ActionDetailModal = observer(({ action, open, onClose }: ActionDetailModal
           />
         </Box>
       </DialogContent>
-      <DialogActions sx={{ justifyContent: 'space-between', px: 2 }}>
-        {hasUnsavedChanges && (
-          <Typography variant="caption" color="warning.main">
-            You have unsaved changes
-          </Typography>
-        )}
-        <Box>
-          <Button onClick={handleClose}>Close</Button>
+      <DialogActions sx={{ px: 2, py: 1.5 }}>
+        <Typography 
+          variant="caption" 
+          color={hasUnsavedChanges ? "warning.main" : "text.secondary"}
+        >
+          {hasUnsavedChanges ? "You have unsaved changes" : "All changes saved"}
+        </Typography>
+        <Box sx={{ ml: 'auto', display: 'flex', gap: 1 }}>
+          <Button onClick={handleClose}>
+            Close
+          </Button>
           <Button 
             onClick={handleSave} 
             variant="contained" 
             disabled={!hasUnsavedChanges || isSaving}
-            sx={{ ml: 1 }}
           >
             {isSaving ? 'Saving...' : 'Save'}
           </Button>
