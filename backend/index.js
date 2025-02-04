@@ -12,7 +12,8 @@ app.use(
     credentials: true,
   })
 );
-console.log(process.env);
+console.log(process.env.MONGO_USERNAME);
+console.log(process.env.MONGO_PASSWORD);
 
 // Construct MongoDB URI
 let MONGO_URI;
