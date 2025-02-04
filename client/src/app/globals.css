@@ -5,14 +5,16 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  color-scheme: light !important;
 }
 
-@media (prefers-color-scheme: dark) {
+/* Remove or comment out the dark mode media query */
+/* @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
   }
-}
+} */
 
 body {
   color: var(--foreground);
@@ -20,6 +22,8 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-html, body, #root {
+html,
+body,
+#root {
   height: 100%;
 }

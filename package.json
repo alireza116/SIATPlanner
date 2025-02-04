@@ -4,10 +4,13 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node backend/index.js && cd client && npm start",
-    "dev": "nodemon backend/index.js && cd client && npm run dev"
+    "start": "concurrently \"node backend/index.js\" \"cd client && npm start\"",
+    "dev": "concurrently \"nodemon backend/index.js\" \"cd client && npm run dev\""
   },
   "author": "",
   "license": "ISC",
-  "description": ""
+  "description": "",
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
 }
