@@ -106,22 +106,50 @@ const SwotList = observer(({
       <Box
         sx={{
           p: 2,
+          height: '90px',
           backgroundColor: headerColor || getSwotColor(category, theme).light,
           color: theme.palette.getContrastText(headerColor || getSwotColor(category, theme).light),
           borderRadius: 1,
           mb: 2,
           opacity: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center'
         }}
       >
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center',
+          height: '100%'
+        }}>
           <Box>
-            <Typography variant="h6">{displayText}</Typography>
-            <Typography variant="caption">{subtitle}</Typography>
+            <Typography 
+              variant="h6" 
+              sx={{ 
+                lineHeight: 1.2,
+                mb: 0.5
+              }}
+            >
+              {displayText}
+            </Typography>
+            <Typography 
+              variant="caption" 
+              sx={{ 
+                display: 'block',
+                lineHeight: 1.2
+              }}
+            >
+              {subtitle}
+            </Typography>
           </Box>
           <IconButton 
             size="small" 
             onClick={() => setIsAdding(true)}
-            sx={{ color: 'white' }}
+            sx={{ 
+              color: 'white',
+              alignSelf: 'center'
+            }}
           >
             <AddIcon />
           </IconButton>

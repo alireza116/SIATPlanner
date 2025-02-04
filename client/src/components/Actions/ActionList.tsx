@@ -23,17 +23,14 @@ import { SwotEntry } from '@/stores/SwotStore';
 import { getSwotChipColor, getSwotColor } from '@/theme/swotTheme';
 import ActionCard from './ActionCard';
 import BaseCard from '@/components/Common/BaseCard';
+import ActionDetailModal from './ActionDetailModal';
 
 
 interface ActionListProps {
   issueId: string;
 }
 
-interface SwotChip {
-  id: string;
-  type: string;
-  description: string;
-}
+
 
 const ActionList = observer(({ issueId }: ActionListProps) => {
   const { actionStore, uiStore } = useStore();
@@ -53,6 +50,7 @@ const ActionList = observer(({ issueId }: ActionListProps) => {
     swotEntryId: string;
     description: string;
   } | null>(null);
+  const [detailModalAction, setDetailModalAction] = useState<Action | null>(null);
   const theme = useTheme();
 
   const validateAction = (action: { title: string, description: string }) => {
@@ -170,6 +168,14 @@ const ActionList = observer(({ issueId }: ActionListProps) => {
     }
   };
 
+  const handleOpenDetail = (action: Action) => {
+    setDetailModalAction(action);
+  };
+
+  const handleCloseDetail = () => {
+    setDetailModalAction(null);
+  };
+
   return (
     <Box sx={{ 
       display: 'flex', 
@@ -177,11 +183,10 @@ const ActionList = observer(({ issueId }: ActionListProps) => {
       height: '100%',
     }}>
       {/* Header section - stays fixed */}
-      <Box sx={{ mb: 2, flexShrink: 0, px:4, py:3, borderBottom: 1, borderColor: 'divider' }}>
+      <Box sx={{ mb: 2, flexShrink: 0, px: 3, py: 2, borderBottom: 1, borderColor: 'divider' }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
           <Typography variant="h6">Actions</Typography>
           <Button
-
             variant="contained"
             size="small"
             startIcon={<AddIcon />}
@@ -201,7 +206,7 @@ const ActionList = observer(({ issueId }: ActionListProps) => {
         overflow: 'auto',
         display: 'flex',
         flexDirection: 'column',
-        gap:2,
+        gap: 1.5,
         px: 2,
         '& > *': {
           flexShrink: 0
@@ -260,12 +265,13 @@ const ActionList = observer(({ issueId }: ActionListProps) => {
               onDragOver={(e) => handleDragOver(e, action._id)}
               onDragLeave={handleDragLeave}
               onDrop={(e) => handleDrop(e, action._id)}
+              onOpenDetail={() => handleOpenDetail(action)}
             />
           </Box>
         ))}
       </Box>
 
-      {/* Modals stay at the bottom */}
+      {/* All modals */}
       <MessageModal
         open={deleteActionConfirmation !== null}
         title="Delete Action"
@@ -298,12 +304,20 @@ const ActionList = observer(({ issueId }: ActionListProps) => {
         onCancel={() => setDeleteAssociationConfirmation(null)}
         severity="warning"
       />
+
+      {detailModalAction && (
+        <ActionDetailModal
+          action={detailModalAction}
+          open={true}
+          onClose={handleCloseDetail}
+        />
+      )}
     </Box>
   );
 });
 
-const getChipColor = (type: 'Strength' | 'Weakness' | 'Opportunity' | 'Threat') => {
-  return getSwotChipColor(type);
-};
+// const getChipColor = (type: 'Strength' | 'Weakness' | 'Opportunity' | 'Threat') => {
+//   return getSwotChipColor(type);
+// };
 
 export default ActionList; 

@@ -36,9 +36,7 @@ interface ActionCardProps {
   onDragOver: (e: DragEvent<HTMLDivElement>) => void;
   onDragLeave: (e: DragEvent<HTMLDivElement>) => void;
   onDrop: (e: DragEvent<HTMLDivElement>) => void;
-  onMouseEnter?: () => void;
-  onMouseLeave?: (e: React.MouseEvent<HTMLDivElement>) => void;
-  isHighlighted?: boolean;
+  onOpenDetail: () => void;
 }
 
 const SWOT_TYPE_ORDER = ['Strength', 'Weakness', 'Opportunity', 'Threat'] as const;
@@ -116,12 +114,11 @@ const ActionCard = observer(({
   onDragOver,
   onDragLeave,
   onDrop,
-  isHighlighted
+  onOpenDetail
 }: ActionCardProps) => {
   const theme = useTheme();
   const { uiStore } = useStore();
   const [isExpanded, setIsExpanded] = useState(true);
-  const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const actionRef = useRef<HTMLDivElement | null>(null);
 
@@ -134,22 +131,42 @@ const ActionCard = observer(({
     const relatedTarget = event.relatedTarget as Node | null;
     const currentTarget = event.currentTarget;
 
- 
+    if (!actionRef.current || !relatedTarget) {
+      setIsHovered(false);
+      uiStore.clearHoveredIds();
+      return;
+    }
 
-    setIsHovered(false);
-    uiStore.clearHoveredIds();
+    if (!(relatedTarget instanceof Node)) {
+      setIsHovered(false);
+      uiStore.clearHoveredIds();
+      return;
+    }
+
+    if (!actionRef.current.contains(relatedTarget)) {
+      setIsHovered(false);
+      uiStore.clearHoveredIds();
+    }
   };
 
-  const handleChipMouseEnter = (entryId: string) => {
-    uiStore.setHoveredSwotEntryId(entryId);
+  const handleClick = (e: React.MouseEvent) => {
+    // If clicking on a button or chip, don't toggle expansion
+    if (
+      e.target instanceof Element && 
+      (e.target.closest('button') || e.target.closest('.MuiChip-root'))
+    ) {
+      return;
+    }
+    setIsExpanded(!isExpanded);
   };
 
-  const handleChipMouseLeave = (e: React.MouseEvent<HTMLDivElement>) => {
-    handleActionMouseEnter();
+  const handleDetailClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent expansion toggle
+    onOpenDetail();
   };
 
   const renderSwotChips = () => {
-    if (!action.swotEntries?.length) return null;
+    if (!action.swotEntries?.length) return  <Typography sx={{ mt:2 }} variant="body2" color="text.secondary">Drag and drop a SWOT cards here</Typography>;
 
     const groupedEntries = action.swotEntries.reduce((acc, entry) => {
       if (!acc[entry.type]) {
@@ -179,8 +196,8 @@ const ActionCard = observer(({
                     entry={entry}
                     actionId={action._id}
                     onDelete={onRemoveSwotEntry}
-                    onMouseEnter={handleChipMouseEnter}
-                    onMouseLeave={handleChipMouseLeave}
+                    onMouseEnter={handleActionMouseEnter}
+                    onMouseLeave={handleActionMouseLeave}
                   />
                 ))}
               </Box>
@@ -233,7 +250,7 @@ const ActionCard = observer(({
         accentColor={theme.palette.grey[400]}
         className="action-card"
       >
-        <Box>
+
           <TextField
             fullWidth
             label="Title"
@@ -255,128 +272,119 @@ const ActionCard = observer(({
             <Button size="small" onClick={onEditCancel}>Cancel</Button>
             <Button size="small" variant="contained" onClick={onEditSave}>Save</Button>
           </Box>
-        </Box>
+
       </BaseCard>
     );
   }
 
   return (
     <BaseCard
-      className="action-card"
-      isHighlighted={isHighlighted}
-      accentColor={theme.palette.grey[400]}
+      ref={actionRef}
+      onClick={handleClick}
       onMouseEnter={handleActionMouseEnter}
       onMouseLeave={handleActionMouseLeave}
       onDragOver={onDragOver}
       onDragLeave={onDragLeave}
       onDrop={onDrop}
-      onClick={() => setIsExpanded(!isExpanded)}
-      sx={{ cursor: 'pointer' }}
-      ref={actionRef}
+      sx={{
+        position: 'relative',
+        cursor: 'pointer',
+        transition: 'all 0.2s ease-in-out',
+        '&:hover': {
+          transform: 'translateY(-2px)',
+          boxShadow: 2
+        }
+      }}
     >
-      <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-        <Box sx={{ flex: 1 }}>
+
+        <Box sx={{ 
+          display: 'flex', 
+          alignItems: 'flex-start',
+          justifyContent: 'space-between',
+          mb: 1
+        }}>
+          <Typography 
+            variant="subtitle1" 
+            sx={{ 
+              fontWeight: 'medium',
+              flex: 1,
+              mr: 1
+            }}
+          >
+            {action.title}
+          </Typography>
+          
           <Box sx={{ 
-            display: 'flex', 
-            alignItems: 'flex-start',
-            justifyContent: 'space-between',
-            mb: 1
+            display: 'flex',
+            gap: 0.5,
+            alignItems: 'center',
+            ml: 'auto'
           }}>
+            <IconButton size="small" onClick={(e) => {
+              e.stopPropagation();
+              onEditStart({ 
+                id: action._id, 
+                title: action.title, 
+                description: action.description,
+                swotEntries: action.swotEntries || []
+              })
+            }}>
+              <EditIcon fontSize="small" />
+            </IconButton>
+            <IconButton size="small" onClick={(e) => {
+              e.stopPropagation();
+              onDelete(action)
+            }}>
+              <DeleteIcon fontSize="small" />
+            </IconButton>
+            <IconButton size="small" onClick={(e) => {
+              e.stopPropagation();
+              setIsExpanded(!isExpanded);
+            }}>
+              {isExpanded ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
+            </IconButton>
+          </Box>
+        </Box>
+
+        {isExpanded && (
+          <>
             <Typography 
-              variant="subtitle1" 
+              variant="body1" 
               sx={{ 
-                fontWeight: 'medium',
-                flex: 1,
-                mr: 1
+                wordBreak: 'break-word',
+                whiteSpace: 'pre-wrap',
+                mr: 2,
+                mb: 1.5
               }}
             >
-              {action.title}
+              {action.description}
             </Typography>
-            
+            <hr />
+            {renderSwotChips()}
             <Box sx={{ 
-              display: 'flex',
-              gap: 0.5,
+              display: 'flex', 
+              justifyContent: 'space-between', 
               alignItems: 'center',
-              ml: 'auto'
+              mt: 1.5
             }}>
-              <IconButton size="small" onClick={(e) => {
-                e.stopPropagation();
-                onEditStart({ 
-                  id: action._id, 
-                  title: action.title, 
-                  description: action.description,
-                  swotEntries: action.swotEntries || []
-                })
-              }}>
-                <EditIcon fontSize="small" />
-              </IconButton>
-              <IconButton size="small" onClick={(e) => {
-                e.stopPropagation();
-                onDelete(action)
-              }}>
-                <DeleteIcon fontSize="small" />
-              </IconButton>
-              <IconButton size="small" onClick={(e) => {
-                e.stopPropagation();
-                setIsExpanded(!isExpanded);
-              }}>
-                {isExpanded ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
-              </IconButton>
-            </Box>
-          </Box>
-
-          {isExpanded ? (
-            <>
               <Typography 
-                variant="body1" 
-                sx={{ 
-                  wordBreak: 'break-word',
-                  whiteSpace: 'pre-wrap',
-                  mr: 2,
-                  mb: 2
-                }}
+                variant="caption" 
+                color="text.secondary"
               >
-                {action.description}
+                Added by {action.createdBy}
               </Typography>
-              <hr />
-              {renderSwotChips()}
-              <Box sx={{ 
-                display: 'flex', 
-                justifyContent: 'space-between', 
-                alignItems: 'center',
-                mt: 2 
-              }}>
-                <Typography 
-                  variant="caption" 
-                  color="text.secondary"
-                >
-                  Added by {action.createdBy}
-                </Typography>
-                <Button
-                  size="small"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setDetailModalOpen(true);
-                  }}
-                  startIcon={<OpenInFullIcon />}
-                >
-                  Action Details
-                </Button>
-              </Box>
-            </>
-          ) : (
-            renderCompactChips()
-          )}
-        </Box>
-      </Box>
-      
-      {detailModalOpen && (
-        <ActionDetailModal
-          action={action}
-          open={detailModalOpen}
-          onClose={() => setDetailModalOpen(false)}
-        />
-      )}
+              <Button
+                color="inherit"
+                onClick={handleDetailClick}
+                startIcon={<OpenInFullIcon />}
+                size="small"
+              >
+                Details
+              </Button>
+            </Box>
+          </>
+        )}
+
     </BaseCard>
   );
 });
