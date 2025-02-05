@@ -1,4 +1,5 @@
 # cloudbuild.yaml
+
 steps:
   # Build and deploy the backend service
   - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
@@ -27,7 +28,7 @@ steps:
       - "--platform"
       - "managed"
       - "--region"
-      - "Northamerica-Northeast1"
+      - "northamerica-northeast1"
       - "--allow-unauthenticated"
 
   # Build and deploy the client service
@@ -57,12 +58,11 @@ steps:
       - "--platform"
       - "managed"
       - "--region"
-      - "Northamerica-Northeast1"
+      - "northamerica-northeast1"
       - "--allow-unauthenticated"
 
 images:
   - gcr.io/$PROJECT_ID/backend:latest
   - gcr.io/$PROJECT_ID/client:latest
 options:
-  serviceAccount: 928057145694-compute@developer.gserviceaccount.com
   default_logs_bucket_behavior: REGIONAL_USER_OWNED_BUCKET
