@@ -1,6 +1,7 @@
 import { makeAutoObservable, runInAction } from 'mobx';
 import axios from 'axios';
 import { SwotEntry } from './SwotStore';
+import { AxiosError } from 'axios';
 
 
 export interface Action {
@@ -45,9 +46,10 @@ class ActionStore {
         }));
         this.loading = false;
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       runInAction(() => {
-        this.error = error.message || 'Failed to fetch actions';
+        const axiosError = error as AxiosError;
+        this.error = axiosError.message || 'Failed to fetch actions';
         this.loading = false;
         console.error('Error fetching actions:', error);
       });
@@ -89,9 +91,10 @@ class ActionStore {
         }
         this.loading = false;
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       runInAction(() => {
-        this.error = error.message || 'Failed to update action';
+        const axiosError = error as AxiosError;
+        this.error = axiosError.message || 'Failed to update action';
         this.loading = false;
       });
       throw error;
@@ -129,7 +132,7 @@ class ActionStore {
           };
         }
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to add SWOT entry:', error);
       throw error;
     }
@@ -149,7 +152,7 @@ class ActionStore {
           };
         }
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to remove SWOT entry:', error);
       throw error;
     }
@@ -190,9 +193,10 @@ class ActionStore {
         }
         this.loading = false;
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       runInAction(() => {
-        this.error = error.message || 'Failed to update action detail';
+        const axiosError = error as AxiosError;
+        this.error = axiosError.message || 'Failed to update action detail';
         this.loading = false;
       });
       throw error;
@@ -215,9 +219,10 @@ class ActionStore {
         this.loading = false;
       });
       return response.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       runInAction(() => {
-        this.error = error.message || 'Failed to delete action detail';
+        const axiosError = error as AxiosError;
+        this.error = axiosError.message || 'Failed to delete action detail';
         this.loading = false;
       });
       throw error;
@@ -240,9 +245,10 @@ class ActionStore {
         this.loading = false;
       });
       return response.data.detail;
-    } catch (error: any) {
+    } catch (error: unknown) {
       runInAction(() => {
-        this.error = error.message || 'Failed to fetch action detail';
+        const axiosError = error as AxiosError;
+        this.error = axiosError.message || 'Failed to fetch action detail';
         this.loading = false;
       });
       throw error;

@@ -16,9 +16,10 @@ interface SwotChipProps {
 export interface CompactSwotChipProps { 
   type: string; 
   count: number;
-  entries: SwotEntry[];
+  // entries: SwotEntry[];
   onMouseEnter: (e: React.MouseEvent<HTMLDivElement>) => void;
   onMouseLeave: (e: React.MouseEvent<HTMLDivElement>) => void;
+
 }
 
 export const SwotChip = observer(
@@ -71,7 +72,7 @@ export const SwotChip = observer(
 export const CompactSwotChip = observer(({ 
   type, 
   count, 
-  entries,
+  // entries,
   onMouseEnter,
   onMouseLeave 
 }: CompactSwotChipProps) => {

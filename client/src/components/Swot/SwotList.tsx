@@ -205,7 +205,11 @@ const SwotList = observer(({
               isHighlighted={uiStore.isSwotEntryHighlighted(entry._id)}
               onEditStart={setEditingEntry}
               onEditCancel={() => setEditingEntry(null)}
-              onEditSave={() => handleEdit(editingEntry?.id!)}
+              onEditSave={() => {
+                if (editingEntry?.id) {
+                  handleEdit(editingEntry.id);
+                }
+              }}
               onDelete={handleDeleteClick}
               onEditChange={(description) => setEditingEntry({ 
                 ...editingEntry!, 

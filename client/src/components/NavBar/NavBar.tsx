@@ -57,7 +57,7 @@ const NavBar = observer(() => {
       <Toolbar>
         <Box sx={{ flex: 1 }}>
           <Breadcrumbs separator={<NavigateNextIcon fontSize="small" />}>
-            {getBreadcrumbs().map((crumb, index) => (
+            {getBreadcrumbs().map((crumb) => (
               <Link key={crumb.href} href={crumb.href} passHref>
                 <Typography
                   component="span"

@@ -5,6 +5,9 @@ const cors = require("cors");
 const routes = require("./api/routes");
 
 const app = express();
+
+const PORT = process.env.PORT || 8080;
+
 app.use(express.json());
 app.use(
   cors({
@@ -14,7 +17,6 @@ app.use(
 );
 console.log(process.env.MONGO_USERNAME);
 console.log(process.env.MONGO_PASSWORD);
-
 // Construct MongoDB URI
 let MONGO_URI;
 if (process.env.MONGO_URI) {
@@ -39,8 +41,6 @@ console.log(
   "URI starts with:",
   MONGO_URI.substring(0, MONGO_URI.indexOf("://") + 6)
 );
-
-const PORT = process.env.PORT || 8080;
 
 // MongoDB Connection with better error handling
 mongoose

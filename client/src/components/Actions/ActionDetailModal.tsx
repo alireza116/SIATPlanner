@@ -27,13 +27,13 @@ const ActionDetailModal = observer(
     const [content, setContent] = useState(action.detail || "");
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
+    // const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
       if (open) {
         const fetchDetails = async () => {
           try {
-            setIsLoading(true);
+            // setIsLoading(true);
             console.log("Fetching details for action:", action._id);
             await actionStore.fetchActionDetail(action._id);
             console.log("Fetched action detail:", action.detail);
@@ -42,7 +42,7 @@ const ActionDetailModal = observer(
           } catch (error) {
             console.error("Failed to fetch action details:", error);
           } finally {
-            setIsLoading(false);
+            // setIsLoading(false);
           }
         };
         fetchDetails();

@@ -22,7 +22,7 @@ interface RichTextEditorProps {
 
 const RichTextEditor = ({ value, onChange, readOnly = false, id }: RichTextEditorProps) => {
   console.log('RichTextEditor rendering with value:', value);
-  
+  console.log('RichTextEditor rendering with readOnly:', id);
   const editor = useEditor({
     extensions: [
       StarterKit,

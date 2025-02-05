@@ -2,12 +2,13 @@ import { Card, CardContent } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { alpha } from '@mui/material/styles';
 import { SxProps, Theme } from '@mui/material/styles';
+import { forwardRef } from 'react';
 
 interface BaseCardProps {
   children: React.ReactNode;
   isHighlighted?: boolean;
   accentColor?: string;
-  onClick?: () => void;
+  onClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
   className?: string;
   onMouseEnter?: () => void;
   onMouseLeave?: (e: React.MouseEvent<HTMLDivElement>) => void;
@@ -17,9 +18,10 @@ interface BaseCardProps {
   draggable?: boolean;
   onDragStart?: (e: React.DragEvent<HTMLDivElement>) => void;
   sx?: SxProps<Theme>;
+  ref?: React.RefObject<HTMLDivElement>;
 }
 
-const BaseCard = ({
+const BaseCard = forwardRef<HTMLDivElement, BaseCardProps>(({
   children,
   isHighlighted,
   accentColor,
@@ -32,11 +34,12 @@ const BaseCard = ({
   onDrop,
   draggable,
   onDragStart,
-}: BaseCardProps) => {
+}, ref) => {
   const theme = useTheme();
 
   return (
     <Card
+      ref={ref}
       className={className}
       onClick={onClick}
       onMouseEnter={onMouseEnter}
@@ -61,6 +64,8 @@ const BaseCard = ({
       </CardContent>
     </Card>
   );
-};
+});
+
+BaseCard.displayName = 'BaseCard';
 
 export default BaseCard; 

@@ -38,10 +38,12 @@ const SwotPage = observer(() => {
           actionStore.fetchActions(id as string)
         ]);
       } catch (err) {
+        console.error('Error fetching data:', err);
         setError('Failed to fetch data');
       } finally {
         setLoading(false);
       }
+
     };
 
     if (isClient) {

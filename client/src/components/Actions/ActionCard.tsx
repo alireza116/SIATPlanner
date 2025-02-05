@@ -17,9 +17,7 @@ import { SwotEntry } from '@/stores/SwotStore';
 import {SwotChip, CompactSwotChip} from './SwotChip';
 import { useStore } from '@/stores/StoreProvider';
 import { useTheme } from '@mui/material/styles';
-import { getSwotColor, SwotTheme } from '@/theme/swotTheme';
 import BaseCard from '../Common/BaseCard';
-import ActionDetailModal from './ActionDetailModal';
 
 interface ActionCardProps {
   action: Action;
@@ -87,32 +85,32 @@ const ActionCard = observer(({
   const theme = useTheme();
   const { uiStore } = useStore();
   const [isExpanded, setIsExpanded] = useState(true);
-  const [isHovered, setIsHovered] = useState(false);
+  // const [isHovered, setIsHovered] = useState(false);
   const actionRef = useRef<HTMLDivElement | null>(null);
 
   const handleActionMouseEnter = () => {
-    setIsHovered(true);
+    // setIsHovered(true);
     uiStore.setHoveredActionId(action._id, action.swotEntries?.map(entry => entry._id) || []);
   };
 
   const handleActionMouseLeave = (event: React.MouseEvent<HTMLDivElement>) => {
     const relatedTarget = event.relatedTarget as Node | null;
-    const currentTarget = event.currentTarget;
+    // const currentTarget = event.currentTarget;
 
     if (!actionRef.current || !relatedTarget) {
-      setIsHovered(false);
+      // setIsHovered(false);
       uiStore.clearHoveredIds();
       return;
     }
 
     if (!(relatedTarget instanceof Node)) {
-      setIsHovered(false);
+      // setIsHovered(false);
       uiStore.clearHoveredIds();
       return;
     }
 
     if (!actionRef.current.contains(relatedTarget)) {
-      setIsHovered(false);
+      // setIsHovered(false);
       uiStore.clearHoveredIds();
     }
   };
@@ -214,10 +212,11 @@ const ActionCard = observer(({
               key={type}
               type={type}
               count={entries.length}
-              entries={entries}
+              // entries={entries} 
               onMouseEnter={() => handleCompactChipMouseEnter(entries)}
               onMouseLeave={handleCompactChipMouseLeave}
             />
+
           );
         })}
       </Box>

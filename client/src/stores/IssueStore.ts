@@ -1,5 +1,6 @@
 import { makeAutoObservable, runInAction } from 'mobx';
 import axios from 'axios';
+import { AxiosError } from 'axios';
 
 
 // Move the interface to the top and export it
@@ -46,10 +47,11 @@ class IssueStore {
         this.issues = response.data;
         this.loading = false;
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Full error:', error);
       runInAction(() => {
-        this.error = error.message || 'Failed to fetch issues';
+        const axiosError = error as AxiosError;
+        this.error = axiosError.message || 'Failed to fetch issues';
         this.loading = false;
       });
     }
@@ -128,9 +130,10 @@ class IssueStore {
         this.currentIssue = response.data;
         this.loading = false;
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       runInAction(() => {
-        this.error = error.message || 'Failed to fetch issue';
+        const axiosError = error as AxiosError;
+        this.error = axiosError.message || 'Failed to fetch issue';
         this.loading = false;
       });
       throw error;

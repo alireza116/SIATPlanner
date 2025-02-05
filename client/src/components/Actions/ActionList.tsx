@@ -3,24 +3,18 @@ import { observer } from 'mobx-react-lite';
 import { useStore } from '@/stores/StoreProvider';
 import {
   Box,
-  Card,
   CardContent,
   Typography,
-  IconButton,
   TextField,
   Button,
-  Chip,
-  Stack,
   Alert,
-  useTheme,
+  // useTheme,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
+
 import MessageModal from '@/components/Common/MessageModal';
 import { Action } from '@/stores/ActionStore';
 import { SwotEntry } from '@/stores/SwotStore';
-import { getSwotChipColor, getSwotColor } from '@/theme/swotTheme';
 import ActionCard from './ActionCard';
 import BaseCard from '@/components/Common/BaseCard';
 import ActionDetailModal from './ActionDetailModal';
@@ -33,7 +27,7 @@ interface ActionListProps {
 
 
 const ActionList = observer(({ issueId }: ActionListProps) => {
-  const { actionStore, uiStore } = useStore();
+  const { actionStore } = useStore();
   const [isAdding, setIsAdding] = useState(false);
   const [editingAction, setEditingAction] = useState<{
     id: string;
@@ -43,7 +37,7 @@ const ActionList = observer(({ issueId }: ActionListProps) => {
   } | null>(null);
   const [newAction, setNewAction] = useState({ title: '', description: '' });
   const [validationError, setValidationError] = useState<string | null>(null);
-  const [isDraggingOver, setIsDraggingOver] = useState<string | null>(null);
+  // const [isDraggingOver, setIsDraggingOver] = useState<string | null>(null);
   const [deleteActionConfirmation, setDeleteActionConfirmation] = useState<Action | null>(null);
   const [deleteAssociationConfirmation, setDeleteAssociationConfirmation] = useState<{
     actionId: string;
@@ -51,7 +45,7 @@ const ActionList = observer(({ issueId }: ActionListProps) => {
     description: string;
   } | null>(null);
   const [detailModalAction, setDetailModalAction] = useState<Action | null>(null);
-  const theme = useTheme();
+  // const theme = useTheme();
 
   const validateAction = (action: { title: string, description: string }) => {
     if (!action.title.trim()) {
@@ -104,27 +98,27 @@ const ActionList = observer(({ issueId }: ActionListProps) => {
     }
   };
 
-  const handleDeleteAction = async (id: string) => {
-    try {
-      await actionStore.deleteAction(id);
-    } catch (error) {
-      console.error('Failed to delete action:', error);
-    }
-  };
+  // const handleDeleteAction = async (id: string) => {
+  //   try {
+  //     await actionStore.deleteAction(id);
+  //   } catch (error) {
+  //     console.error('Failed to delete action:', error);
+  //   }
+  // };
 
-  const handleDragOver = (e: DragEvent<HTMLDivElement>, actionId: string) => {
+  const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
-    setIsDraggingOver(actionId);
+    // setIsDraggingOver(actionId);
   };
 
   const handleDragLeave = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
-    setIsDraggingOver(null);
+    // setIsDraggingOver(null);
   };
 
   const handleDrop = async (e: DragEvent<HTMLDivElement>, actionId: string) => {
     e.preventDefault();
-    setIsDraggingOver(null);
+    // setIsDraggingOver(null);
     try {
       const swotData = JSON.parse(e.dataTransfer.getData('application/json'));
       await actionStore.addSwotEntryToAction(actionId, swotData.id);
@@ -262,7 +256,7 @@ const ActionList = observer(({ issueId }: ActionListProps) => {
               onEditCancel={() => setEditingAction(null)}
               onDelete={handleDeleteActionClick}
               onRemoveSwotEntry={handleRemoveSwotEntryClick}
-              onDragOver={(e) => handleDragOver(e, action._id)}
+              onDragOver={(e) => handleDragOver(e)}
               onDragLeave={handleDragLeave}
               onDrop={(e) => handleDrop(e, action._id)}
               onOpenDetail={() => handleOpenDetail(action)}

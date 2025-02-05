@@ -10,7 +10,7 @@ export default function Home() {
     <Container maxWidth="lg">
       <Box sx={{ py: 8 }}>
         <Typography variant="h2" component="h1" gutterBottom>
-          Hi!
+          Hi! I&apos;m a tool for strategic thinking. 
         </Typography>
 
         <Paper elevation={3} sx={{ p: 4, mt: 4 }}>
@@ -18,7 +18,7 @@ export default function Home() {
             About This Tool
           </Typography>
           <Typography paragraph>
-            We've been having many ideas, and a lot of discussions. Often
+            We&apos;ve been having many ideas, and a lot of discussions. Often
             addressing issues from different perspectives. I thoguht one way to
             deal with it would be to be more strategic about it. So a
             collaborative SWOT tool could be the way?

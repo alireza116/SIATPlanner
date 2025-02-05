@@ -1,5 +1,5 @@
 import { makeAutoObservable, runInAction } from 'mobx';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { actionStore } from '../stores/ActionStore';
 
 export interface SwotEntry {
@@ -36,9 +36,10 @@ class SwotStore {
         this.entries = response.data;
         this.loading = false;
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       runInAction(() => {
-        this.error = error.message || 'Failed to fetch SWOT entries';
+        const axiosError = error as AxiosError;
+        this.error = axiosError.message || 'Failed to fetch SWOT entries';
         this.loading = false;
       });
     }
@@ -54,7 +55,7 @@ class SwotStore {
         this.loading = false;
       });
       return response.data;
-    } catch (error) {
+    } catch (error: unknown) {
       runInAction(() => {
         this.error = 'Failed to create SWOT entry';
         this.loading = false;
@@ -88,7 +89,7 @@ class SwotStore {
       });
       actionStore.updateSwotEntryInActions(id, response.data);
       return response.data;
-    } catch (error) {
+    } catch (error: unknown) {
       runInAction(() => {
         this.error = 'Failed to update SWOT entry';
         this.loading = false;
@@ -107,7 +108,7 @@ class SwotStore {
       });
       // Notify ActionStore to remove this entry from all actions
       actionStore.removeDeletedSwotEntry(id);
-    } catch (error) {
+    } catch (error: unknown) {
       runInAction(() => {
         this.error = 'Failed to delete SWOT entry';
         this.loading = false;
