@@ -2,7 +2,6 @@
 FROM node:20-alpine AS builder
 WORKDIR /app
 
-
 # Copy package files and install dependencies
 COPY package*.json ./
 RUN npm install
@@ -17,10 +16,13 @@ RUN npm run build
 FROM node:20-alpine
 WORKDIR /app
 
-# Copy the standalone output from the builder stage
+# Copy the standalone output (server) from the builder stage
 COPY --from=builder /app/.next/standalone ./.next/standalone
 
-# Copy the production node_modules (only those required to run the standalone server)
+# **NEW**: Copy the static assets so the server can find the client bundles
+COPY --from=builder /app/.next/static ./.next/static
+
+# Copy production node_modules (only those required to run the standalone server)
 COPY --from=builder /app/node_modules ./node_modules
 
 # If your Next.js app uses static files (e.g., images, public assets), copy them as well.
