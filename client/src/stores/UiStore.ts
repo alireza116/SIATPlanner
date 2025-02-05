@@ -19,6 +19,11 @@ class UiStore {
     this.highlightedSwotEntryIds = new Set(id ? [id] : []);
   }
 
+  setHoveredSwotEntryIds(ids: string[]) {
+    this.hoveredSwotEntryId = null;
+    this.highlightedSwotEntryIds = new Set(ids);
+  }
+
   clearHoveredIds() {
     this.hoveredActionId = null;
     this.hoveredSwotEntryId = null;

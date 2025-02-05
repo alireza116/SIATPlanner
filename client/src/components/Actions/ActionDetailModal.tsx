@@ -18,7 +18,7 @@ import { useEffect, useState } from "react";
 interface ActionDetailModalProps {
   action: Action;
   open: boolean;
-  onClose: () => void;
+  onClose: (e?: React.MouseEvent) => void;
 }
 
 const ActionDetailModal = observer(

@@ -16,7 +16,7 @@ import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import OpenInFullIcon from '@mui/icons-material/OpenInFull';
 import { Action } from '@/stores/ActionStore';
 import { SwotEntry } from '@/stores/SwotStore';
-import SwotChip from './SwotChip';
+import {SwotChip, CompactSwotChip} from './SwotChip';
 import { useStore } from '@/stores/StoreProvider';
 import { useTheme } from '@mui/material/styles';
 import { getSwotColor, SwotTheme } from '@/theme/swotTheme';
@@ -71,36 +71,6 @@ const getTypePlural = (type: string) => {
   }
 };
 
-const CompactSwotChip = observer(({ 
-  type, 
-  count, 
-  entries,
-  onMouseEnter,
-  onMouseLeave 
-}: { 
-  type: string; 
-  count: number;
-  entries: SwotEntry[];
-  onMouseEnter: () => void;
-  onMouseLeave: (e: React.MouseEvent<HTMLDivElement>) => void;
-}) => {
-  const theme = useTheme();
-  
-  return (
-    <Chip
-      label={`${type[0]}${count > 1 ? ` (${count})` : ''}`}
-      size="small"
-      sx={{ 
-        minWidth: 32,
-        backgroundColor: getSwotColor(type as keyof SwotTheme, theme).main,
-        color: theme.palette.getContrastText(getSwotColor(type as keyof SwotTheme, theme).main),
-      }}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
-    />
-  );
-});
-
 const ActionCard = observer(({
   action,
   isEditing,
@@ -147,6 +117,22 @@ const ActionCard = observer(({
       setIsHovered(false);
       uiStore.clearHoveredIds();
     }
+  };
+
+  const handleSwotChipMouseEnter = (entryId: string) => {
+    uiStore.setHoveredSwotEntryId(entryId);
+  };
+
+  const handleSwotChipMouseLeave = () => {
+    handleActionMouseEnter(); // Revert to showing all entries for this action
+  };
+
+  const handleCompactChipMouseEnter = (entries: SwotEntry[]) => {
+    uiStore.setHoveredSwotEntryIds(entries.map(entry => entry._id));
+  };
+
+  const handleCompactChipMouseLeave = () => {
+    handleActionMouseEnter(); // Revert to showing all entries for this action
   };
 
   const handleClick = (e: React.MouseEvent) => {
@@ -196,8 +182,8 @@ const ActionCard = observer(({
                     entry={entry}
                     actionId={action._id}
                     onDelete={onRemoveSwotEntry}
-                    onMouseEnter={handleActionMouseEnter}
-                    onMouseLeave={handleActionMouseLeave}
+                    onMouseEnter={handleSwotChipMouseEnter}
+                    onMouseLeave={handleSwotChipMouseLeave}
                   />
                 ))}
               </Box>
@@ -231,12 +217,8 @@ const ActionCard = observer(({
               type={type}
               count={entries.length}
               entries={entries}
-              onMouseEnter={() => {
-                entries.forEach(entry => {
-                  uiStore.setHoveredSwotEntryId(entry._id);
-                });
-              }}
-              onMouseLeave={handleActionMouseEnter}
+              onMouseEnter={() => handleCompactChipMouseEnter(entries)}
+              onMouseLeave={handleCompactChipMouseLeave}
             />
           );
         })}
@@ -345,6 +327,8 @@ const ActionCard = observer(({
             </IconButton>
           </Box>
         </Box>
+
+        {!isExpanded && renderCompactChips()}
 
         {isExpanded && (
           <>

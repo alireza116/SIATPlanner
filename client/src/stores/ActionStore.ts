@@ -24,8 +24,14 @@ class ActionStore {
 
   constructor() {
     makeAutoObservable(this);
-    this.baseUrl = 'http://localhost:8080';
+    console.log("public api base url", process.env.NEXT_PUBLIC_API_BASE_URL);
+    if (process.env.NEXT_PUBLIC_API_BASE_URL) {
+      this.baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+    } else {
+      this.baseUrl = 'http://localhost:8080';
+    }
   }
+
 
   async fetchActions(issueId: string) {
     this.loading = true;

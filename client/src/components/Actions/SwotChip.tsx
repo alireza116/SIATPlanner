@@ -2,7 +2,7 @@ import { Chip } from "@mui/material";
 import { observer } from "mobx-react-lite";
 import { useStore } from "@/stores/StoreProvider";
 import { useTheme } from "@mui/material/styles";
-import { getSwotColor } from "@/theme/swotTheme";
+import { getSwotColor, SwotTheme } from "@/theme/swotTheme";
 import { SwotEntry } from "@/stores/SwotStore";
 
 interface SwotChipProps {
@@ -13,7 +13,15 @@ interface SwotChipProps {
   onMouseLeave: (e: React.MouseEvent<HTMLDivElement>) => void;
 }
 
-const SwotChip = observer(
+export interface CompactSwotChipProps { 
+  type: string; 
+  count: number;
+  entries: SwotEntry[];
+  onMouseEnter: (e: React.MouseEvent<HTMLDivElement>) => void;
+  onMouseLeave: (e: React.MouseEvent<HTMLDivElement>) => void;
+}
+
+export const SwotChip = observer(
   ({
     entry,
     actionId,
@@ -58,4 +66,30 @@ const SwotChip = observer(
   }
 );
 
-export default SwotChip;
+
+
+export const CompactSwotChip = observer(({ 
+  type, 
+  count, 
+  entries,
+  onMouseEnter,
+  onMouseLeave 
+}: CompactSwotChipProps) => {
+  const theme = useTheme();
+  
+  return (
+    <Chip
+      label={`${type[0]}${count > 1 ? ` (${count})` : ''}`}
+      size="small"
+      sx={{ 
+        minWidth: 32,
+        backgroundColor: getSwotColor(type as keyof SwotTheme, theme).main,
+        color: theme.palette.getContrastText(getSwotColor(type as keyof SwotTheme, theme).main),
+      }}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+    />
+  );
+});
+
+

@@ -1,15 +1,23 @@
-FROM node:18-alpine
+# Client/Dockerfile
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Copy package files first
-COPY package.json package-lock.json ./
-
-# Install dependencies
+# Install dependencies and build the app
+COPY package*.json ./
 RUN npm install
-
-# Copy the rest of the application
 COPY . .
+RUN npm run build
 
-# Build and start commands
-CMD ["npm", "run", "dev"]
+# Production image
+FROM node:16-alpine
+
+WORKDIR /app
+COPY --from=builder /app ./
+
+# Cloud Run will provide the PORT variable (default 8080)
+ENV PORT 8080
+EXPOSE 8080
+
+# Start the Next.js server (adjust if you use a custom command)
+CMD ["npm", "start"]

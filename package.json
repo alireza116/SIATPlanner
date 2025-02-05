@@ -4,8 +4,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "concurrently \"node backend/index.js\" \"cd client && npm start\"",
-    "dev": "concurrently \"nodemon backend/index.js\" \"cd client && npm run dev\""
+    "start": "concurrently \"cd backend && node backend/index.js\" \"cd client && npm start\"",
+    "dev": "concurrently \"cd backend && nodemon backend/index.js\" \"cd client && npm run dev\""
   },
   "author": "",
   "license": "ISC",

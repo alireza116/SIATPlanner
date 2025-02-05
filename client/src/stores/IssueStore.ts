@@ -22,7 +22,11 @@ class IssueStore {
 
   constructor() {
     makeAutoObservable(this);
-    this.baseUrl = 'http://localhost:8080';
+    if (process.env.NEXT_PUBLIC_API_BASE_URL) {
+      this.baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+    } else {
+      this.baseUrl = 'http://localhost:8080';
+    }
     console.log('Store initialized with baseUrl:', this.baseUrl);
   }
 
